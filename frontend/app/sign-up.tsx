@@ -3,16 +3,19 @@ import { Text, View, StyleSheet, TextInput, TouchableOpacity } from 'react-nativ
 import { useSession } from '../ctx';
 import { router } from 'expo-router';
 
-export default function SignIn() {
-	const { signIn } = useSession();
+export default function SignUp() {
+	const { signUp } = useSession();
 
+	const [firstName, setFirstName] = useState('');
+	const [lastName, setLastName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 
-	const handleLogin = async () => {
+	const handleSignUp = async () => {
 		try {
-			await signIn(email, password);
+			const fullName = `${firstName} ${lastName}`;
+			await signUp(email, password, fullName);
 			router.replace('/');
 		} catch (err: any) {
 			setError(err.message);
@@ -21,9 +24,20 @@ export default function SignIn() {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Kachow Car Identification</Text>
-			<Text style={styles.subtitle}>Identify cars like never before!</Text>
+			<Text style={styles.title}>Create Your Account</Text>
 
+			<TextInput
+				style={styles.input}
+				placeholder="First Name"
+				onChangeText={setFirstName}
+				value={firstName}
+			/>
+			<TextInput
+				style={styles.input}
+				placeholder="Last Name"
+				onChangeText={setLastName}
+				value={lastName}
+			/>
 			<TextInput
 				style={styles.input}
 				placeholder="Email"
@@ -31,7 +45,6 @@ export default function SignIn() {
 				onChangeText={setEmail}
 				value={email}
 			/>
-
 			<TextInput
 				style={styles.input}
 				placeholder="Password"
@@ -42,12 +55,12 @@ export default function SignIn() {
 
 			{error ? <Text style={styles.error}>{error}</Text> : null}
 
-			<TouchableOpacity style={styles.button} onPress={handleLogin}>
-				<Text style={styles.buttonText}>Sign In</Text>
+			<TouchableOpacity style={styles.button} onPress={handleSignUp}>
+				<Text style={styles.buttonText}>Sign Up</Text>
 			</TouchableOpacity>
 
-			<TouchableOpacity onPress={() => router.push('/sign-up')}>
-				<Text style={styles.link}>Don't have an account? Sign up</Text>
+			<TouchableOpacity onPress={() => router.push('/sign-in')}>
+				<Text style={styles.link}>Already have an account? Sign in</Text>
 			</TouchableOpacity>
 		</View>
 	);
@@ -64,13 +77,7 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
-		marginBottom: 10,
-		color: '#666',
-	},
-	subtitle: {
-		fontSize: 16,
-		marginBottom: 30,
-		color: '#666',
+		marginBottom: 20,
 	},
 	input: {
 		width: '100%',
@@ -86,11 +93,10 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	button: {
-		backgroundColor: '#f44336',
+		backgroundColor: '#4CAF50',
 		paddingVertical: 12,
 		paddingHorizontal: 30,
 		borderRadius: 8,
-		marginBottom: 10,
 	},
 	buttonText: {
 		color: 'white',
