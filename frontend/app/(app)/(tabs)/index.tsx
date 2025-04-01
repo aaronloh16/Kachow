@@ -3,10 +3,12 @@ import { router } from 'expo-router';
 import { useSession } from '../../../ctx';
 
 export default function HomeScreen() {
-	const { signOut } = useSession();
+	const { signOut, session } = useSession();
 
+	
 	return (
 		<View style={styles.container}>
+			<Text style={styles.title}>Hi {session?.displayName}!</Text>
 			<Text style={styles.title}>Welcome to Kachow!</Text>
 			<Text style={styles.subtitle}>Ready to identify some cars?</Text>
 
