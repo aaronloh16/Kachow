@@ -1,11 +1,16 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
+from llms.gemini_handler import GeminiHandler
+from utils.image_processing import process_image
 
 # Load environment variables from .env.local
 load_dotenv('.env.local')
 
 app = Flask(__name__)
+
+# Initialize AI handlers
+gemini_handler = GeminiHandler()
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -28,12 +33,17 @@ def identify_car():
         return jsonify({'error': 'No selected file'}), 400
 
     try:
-        # This will be implemented later with different AI experts
+        # Process the image
+        processed_image = process_image(image_file)
+        
+        # Get predictions from Gemini (other models to be implemented later)
+        gemini_result = gemini_handler.identify_car(processed_image)
+        
         return jsonify({
-            'message': 'Car identification is not yet implemented',
+            'message': 'Car identification using Gemini model',
             'experts': {
                 'openai': 'Not implemented',
-                'gemini': 'Not implemented',
+                'gemini': gemini_result,
                 'custom_model': 'Not implemented'
             }
         })
