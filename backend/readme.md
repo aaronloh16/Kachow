@@ -7,7 +7,7 @@ A Flask backend for car identification using multiple AI experts.
 1. Create a virtual environment:
 
    ```
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
@@ -28,7 +28,7 @@ A Flask backend for car identification using multiple AI experts.
 Start the Flask development server:
 
 ```
-python app.py
+python3 app.py
 ```
 
 The server will run at http://127.0.0.1:5000/
