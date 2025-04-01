@@ -37,3 +37,15 @@ firebase.ts
 *.tsbuildinfo
 
 app-example
+
+#env variables
+.env.local
+
+#python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+#virtual environment
+venv/
