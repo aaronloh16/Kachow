@@ -1,11 +1,44 @@
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadImageToFirebase } from '../../../lib/upload'
 import { useSession } from '../../../ctx';
 
 export default function HomeScreen() {
 	const { signOut, session } = useSession();
 
-	
+	const handlePickAndUpload = async () => {
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ImagePicker.MediaTypeOptions.Images,
+			quality: 1,
+		});
+
+		if (!result.canceled && result.assets.length > 0) {
+			const imageUri = result.assets[0].uri;
+			try {
+				// const firebaseUrl = await uploadImageToFirebase(imageUri);
+				// console.log('Uploaded to:', firebaseUrl);
+
+				//Call Flask backend with that image URL
+				const res = await fetch('http://localhost:5001/identify', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ image_url: 
+						"https://firebasestorage.googleapis.com/v0/b/kachow-6cbae.firebasestorage.app/o/uploads%2F1743551856537.jpg?alt=media&token=dbf69be1-d9f2-4999-8827-a0c9ec71831a"
+					 }),
+				});
+
+				const data = await res.json();
+				console.log('Response from backend:', data);
+				//Alert.alert('Result', data?.final_result || 'Check console for full response');
+				Alert.alert('Image uploaded successfully')
+			} catch (err) {
+				console.error(err);
+				Alert.alert('Upload failed', 'Could not identify the image.');
+			}
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Hi {session?.displayName}!</Text>
@@ -14,27 +47,21 @@ export default function HomeScreen() {
 
 			<TouchableOpacity
 				style={styles.cameraButton}
-				onPress={() => {
-					// This will navigate to the camera screen once we create it
-					// router.push('/camera');
-					alert('Camera functionality coming soon!');
-				}}
+				onPress={handlePickAndUpload}
 			>
-				<Text style={styles.buttonText}>Take Photo</Text>
+				<Text style={styles.buttonText}>Upload Car Photo</Text>
 			</TouchableOpacity>
 
 			<TouchableOpacity
 				style={styles.signOutButton}
-				onPress={() => {
-					signOut();
-					// The _layout.tsx in (app) will handle the redirect to sign-in
-				}}
+				onPress={signOut}
 			>
 				<Text style={styles.signOutText}>Sign Out</Text>
 			</TouchableOpacity>
 		</View>
 	);
 }
+
 
 const styles = StyleSheet.create({
 	container: {

@@ -40,9 +40,3 @@ def gpt4o_identification(image_path):
 
     return jsonify(response.choices[0].message.content)
 
-if __name__ == "__main__":
-    # Example usage
-    image_path = Path("/mnt/c/swe3/3A04/carpics/FordVan.jpg")
-    result = gpt4o_identification(image_path)
-    print(result)
-
