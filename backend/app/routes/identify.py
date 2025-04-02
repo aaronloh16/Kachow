@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify
 from app.experts.openai_expert import OpenAIHandler
 from app.experts.gemini_expert import GeminiHandler
+from app.experts.custom_model_expert import CustomModelHandler
 
 identify_bp = Blueprint('identify', __name__)
 
@@ -18,9 +19,11 @@ def identify_car():
 
     gemini_handler = GeminiHandler()
     openai_handler = OpenAIHandler()
+    custom_model_handler = CustomModelHandler()
     
-    result = gemini_handler.identify_car(image_url)
+    #result = gemini_handler.identify_car(image_url)
     #result = openai_handler.identify_car(image_url)
+    result = custom_model_handler.identify_car(image_url)
     print(result)
 
     #Aggregate results (to be done)
