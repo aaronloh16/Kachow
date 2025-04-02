@@ -19,7 +19,9 @@ def identify_car():
     gemini_handler = GeminiHandler()
     openai_handler = OpenAIHandler()
     
-    #result = gemini_handler.identify_car(image_url)
-    result = openai_handler.identify_car(image_url)
+    result = gemini_handler.identify_car(image_url)
+    #result = openai_handler.identify_car(image_url)
     print(result)
+
+    #Aggregate results (to be done)
     return jsonify(result)
