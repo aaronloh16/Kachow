@@ -1,3 +1,4 @@
+// ctx.tsx
 import {
 	createContext,
 	useContext,
@@ -5,14 +6,11 @@ import {
 	useState,
 	type PropsWithChildren,
 } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './lib/firebase';
-import {
-	signInWithEmailAndPassword,
-	createUserWithEmailAndPassword,
-	signOut as firebaseSignOut,
-	onAuthStateChanged,
-	updateProfile,
-} from 'firebase/auth';
+import { AccountManager } from './lib/auth/AccountManager';
+
+const accountManager = new AccountManager();
 
 const AuthContext = createContext<{
 	signIn: (email: string, password: string) => Promise<void>;
@@ -22,7 +20,6 @@ const AuthContext = createContext<{
 	isLoading: boolean;
 } | null>(null);
 
-// Hook to use session anywhere in your app
 export function useSession() {
 	const value = useContext(AuthContext);
 	if (!value) {
@@ -44,16 +41,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
 	}, []);
 
 	const signIn = async (email: string, password: string) => {
-		await signInWithEmailAndPassword(auth, email, password);
+		const user = await accountManager.authenticate(email, password);
+		setSession(user);
 	};
 
 	const signUp = async (email: string, password: string, fullName: string) => {
-		const cred = await createUserWithEmailAndPassword(auth, email, password);
-		await updateProfile(cred.user, { displayName: fullName });
+		const user = await accountManager.createUser(email, password, fullName);
+		setSession(user);
 	};
 
-	const signOut = () => {
-		firebaseSignOut(auth);
+	const signOut = async () => {
+		await accountManager.signOut();
+		setSession(null);
 	};
 
 	return (
