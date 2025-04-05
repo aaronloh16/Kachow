@@ -22,11 +22,11 @@ def identify_car():
         custom_model_handler = CustomModelHandler()
 
         gemini_result = gemini_handler.identify_car(image_url)
-        #openai_result = openai_handler.identify_car(image_url)
+        openai_result = openai_handler.identify_car(image_url)
         custom_model_result = custom_model_handler.identify_car(image_url)
 
         print("Gemini Result:", gemini_result)
-        #print("OpenAI Result:", openai_result)
+        print("OpenAI Result:", openai_result)
         print("Custom Model Result:", custom_model_result)
 
         # TODO: Aggregate results here and return
@@ -38,7 +38,7 @@ def identify_car():
 
         return jsonify({
             "custom_model": custom_model_result,
-            #"openai": openai_result,
+            "openai": openai_result,
             "gemini": gemini_result,
         })
 
