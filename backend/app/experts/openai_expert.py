@@ -41,7 +41,7 @@ class OpenAIHandler:
             max_tokens=400)
 
             raw = response.choices[0].message.content
-            print(raw)
+            
             cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip(), flags=re.IGNORECASE)
 
             try:
