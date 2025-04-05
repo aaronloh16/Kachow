@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { uploadImageToFirebase } from '../../../lib/upload'
+import { uploadImageToFirebase } from '../../../lib/image/upload'
 import { useSession } from '../../../ctx';
 
 export default function HomeScreen() {
@@ -18,6 +18,7 @@ export default function HomeScreen() {
 			try {
 				// const firebaseUrl = await uploadImageToFirebase(imageUri);
 				// console.log('Uploaded to:', firebaseUrl);
+				Alert.alert('Image uploaded successfully')
 
 				//Call Flask backend with that image URL
 				const res = await fetch('http://localhost:5001/identify', {
@@ -28,10 +29,12 @@ export default function HomeScreen() {
 					 }),
 				});
 
+				
+
 				const data = await res.json();
 				console.log('Response from backend:', data);
 				//Alert.alert('Result', data?.final_result || 'Check console for full response');
-				Alert.alert('Image uploaded successfully')
+				Alert.alert('Success')
 			} catch (err) {
 				console.error(err);
 				Alert.alert('Upload failed', 'Could not identify the image.');
