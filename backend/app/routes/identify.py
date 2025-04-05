@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from app.experts.openai_expert import OpenAIHandler
 from app.experts.gemini_expert import GeminiHandler
 from app.experts.custom_model_expert import CustomModelHandler
+from app.experts.aggregate_results import AggregateResults
 
 identify_bp = Blueprint('identify', __name__)
 
@@ -20,6 +21,7 @@ def identify_car():
         gemini_handler = GeminiHandler()
         openai_handler = OpenAIHandler()
         custom_model_handler = CustomModelHandler()
+        aggregator = AggregateResults()
 
         gemini_result = gemini_handler.identify_car(image_url)
         openai_result = openai_handler.identify_car(image_url)
@@ -29,17 +31,20 @@ def identify_car():
         print("OpenAI Result:", openai_result)
         print("Custom Model Result:", custom_model_result)
 
-        # TODO: Aggregate results here and return
-        # sample data looks like : 
-        # {"custom_model": {"confidence": "12.45%", "details": "Predicted brand based on logo with 12.45% confidence.", "make": "Ford", "model": "Unknown", "year": "Unknown"},
-        # "gemini": {"confidence": "high", "details": "The grille shape, headlight design, and overall body shape are characteristic of the second-generation Ford Transit Custom. The aftermarket modifications, such as the front bumper and wheels, are common for this model.", "make": "Ford", "model": "Transit Custom", "year": "2018-2023 (Second Generation)"}, 
-        # "openai": {"confidence": "high", "details": "The front grille and headlights are characteristic of the Ford Transit Custom model updated around 2018.", "make": "Ford", "model": "Transit Custom", "year": "2018"}
-        # }   
+        # Aggregate the expert results
+        aggregated_result = aggregator.aggregate_experts(
+            openai_result, 
+            gemini_result, 
+            custom_model_result
+        )
+
+        print("Aggregated results", aggregated_result)
 
         return jsonify({
             "custom_model": custom_model_result,
             "openai": openai_result,
             "gemini": gemini_result,
+            "aggregated": aggregated_result
         })
 
     except Exception as e:

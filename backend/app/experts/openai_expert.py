@@ -23,7 +23,7 @@ class OpenAIHandler:
                         {
                             "type": "text",
                             "text": (
-                                "You are a car recognition expert in a car identification app. "
+                                "You are a car recognition expert in a car identification app and you specialize in identification based on car body shape "
                                 "Analyze this image and provide a structured JSON response.\n\n"
                                 "Return a JSON object with the following keys ONLY:\n"
                                 "- make: the car's manufacturer\n"
