@@ -18,11 +18,14 @@ def identify_car():
         return jsonify({"error": "No image_url provided"}), 400
 
     try:
+        # Initialize experts and aggregator
         gemini_handler = GeminiHandler()
         openai_handler = OpenAIHandler()
         custom_model_handler = CustomModelHandler()
         aggregator = AggregateResults()
 
+        # First round - get initial opinions
+        print("Starting first round of identification...")
         gemini_result = gemini_handler.identify_car(image_url)
         openai_result = openai_handler.identify_car(image_url)
         custom_model_result = custom_model_handler.identify_car(image_url)
@@ -32,20 +35,70 @@ def identify_car():
         print("Custom Model Result:", custom_model_result)
 
         # Aggregate the expert results
-        aggregated_result = aggregator.aggregate_experts(
+        first_round_aggregated = aggregator.aggregate_experts(
             openai_result, 
             gemini_result, 
             custom_model_result
         )
-
-        print("Aggregated results", aggregated_result)
-
-        return jsonify({
-            "custom_model": custom_model_result,
-            "openai": openai_result,
-            "gemini": gemini_result,
-            "aggregated": aggregated_result
-        })
+        
+        print("First round aggregated results:", first_round_aggregated)
+        
+        # Check confidence level - if not high, do a second round with blackboard approach
+        if first_round_aggregated.get("confidence", "").lower() != "high":
+            print("Confidence not high enough, initiating second round with blackboard approach...")
+            
+            # Create context for experts - what other experts thought
+            openai_context = {
+                "gemini": gemini_result,
+                "custom_model": custom_model_result,
+                "first_aggregation": first_round_aggregated
+            }
+            
+            gemini_context = {
+                "openai": openai_result,
+                "custom_model": custom_model_result,
+                "first_aggregation": first_round_aggregated
+            }
+            
+            # Second round - with context
+            openai_second_result = openai_handler.identify_car(image_url, openai_context)
+            gemini_second_result = gemini_handler.identify_car(image_url, gemini_context)
+            
+            print("OpenAI Second Round Result:", openai_second_result)
+            print("Gemini Second Round Result:", gemini_second_result)
+            
+            # Final aggregation with second round results
+            final_aggregated = aggregator.aggregate_experts(
+                openai_second_result,
+                gemini_second_result,
+                custom_model_result  # We don't reconsult the ML model
+            )
+            
+            print("Final aggregated results:", final_aggregated)
+            
+            # Return all results
+            return jsonify({
+                "custom_model": custom_model_result,
+                "openai": {
+                    "first_round": openai_result,
+                    "second_round": openai_second_result
+                },
+                "gemini": {
+                    "first_round": gemini_result,
+                    "second_round": gemini_second_result
+                },
+                "aggregated": final_aggregated,
+                "process": "blackboard_two_rounds"
+            })
+        else:
+            # Confidence was high enough in first round
+            return jsonify({
+                "custom_model": custom_model_result,
+                "openai": openai_result,
+                "gemini": gemini_result,
+                "aggregated": first_round_aggregated,
+                "process": "single_round"
+            })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
