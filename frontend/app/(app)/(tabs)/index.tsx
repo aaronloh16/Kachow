@@ -5,11 +5,13 @@ import { uploadImageToFirebase } from '../../../lib/image/upload';
 import { useSession } from '../../../ctx';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useState } from 'react';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 export default function HomeScreen() {
 	const { signOut, session } = useSession();
 	const [loading, setLoading] = useState(false);
 	const [loadingMessage, setLoadingMessage] = useState('Processing image...');
+	const [image, setImage] = useState<ImagePickerAsset | null>(null);
 
 	const handlePickAndUpload = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -25,11 +27,10 @@ export default function HomeScreen() {
 
 				// const firebaseUrl = await uploadImageToFirebase(imageUri);
 				// console.log('Uploaded to:', firebaseUrl);
-				Alert.alert('Image uploaded successfully');
 
 				setLoadingMessage('Consulting the experts...');
 
-				//Call Flask backend with that image URL
+				// Call Flask backend with that image URL
 				const res = await fetch('http://localhost:5001/identify', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -41,9 +42,17 @@ export default function HomeScreen() {
 
 				const data = await res.json();
 				console.log('Response from backend:', data);
-				//Alert.alert('Result', data?.final_result || 'Check console for full response');
+
+				// Navigate to results page with the data
+				router.push({
+					pathname: '/result',
+					params: {
+						image_uri: imageUri,
+						results: JSON.stringify(data),
+					},
+				});
+
 				setLoading(false);
-				Alert.alert('Success');
 			} catch (err) {
 				console.error(err);
 				setLoading(false);
