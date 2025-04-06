@@ -25,7 +25,7 @@ class OpenAIHandler:
     def identify_car_initial(self, image_url):
         """Initial car identification without context from other experts"""
         try:
-            response = self.client.chat.completions.create(model="gpt-4-vision-preview",
+            response = self.client.chat.completions.create(model="gpt-4o",
             messages=[
                 {
                     "role": "user",
@@ -65,7 +65,7 @@ class OpenAIHandler:
     def identify_car_with_context(self, image_url, context):
         """Car identification with context from other experts (blackboard approach)"""
         try:
-            response = self.client.chat.completions.create(model="gpt-4-vision-preview",
+            response = self.client.chat.completions.create(model="gpt-4o",
             messages=[
                 {
                     "role": "user",
