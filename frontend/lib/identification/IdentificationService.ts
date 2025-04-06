@@ -74,7 +74,7 @@ export async function saveIdentification(
  */
 export async function getUserIdentificationHistory(
 	userId: string
-): Promise<IdentificationRecord[]> {
+): Promise<any[]> {
 	try {
 		const q = query(
 			collection(db, `users/${userId}/identifications`),
@@ -82,15 +82,15 @@ export async function getUserIdentificationHistory(
 		);
 
 		const querySnapshot = await getDocs(q);
-		const history: IdentificationRecord[] = [];
+		const history: any[] = [];
 
 		querySnapshot.forEach((doc) => {
 			const data = doc.data();
 			history.push({
 				id: doc.id,
 				timestamp: data.timestamp,
-				imageUrl: data.imageUrl,
-				userGuess: data.userGuess,
+				imageUrl: data.image_url,
+				userGuess: data.user_guess,
 				correctGuess: data.correctGuess,
 				results: data.results,
 			});
@@ -122,8 +122,8 @@ export async function getIdentificationById(
 			return {
 				id: docSnap.id,
 				timestamp: data.timestamp,
-				imageUrl: data.imageUrl,
-				userGuess: data.userGuess,
+				imageUrl: data.image_url,
+				userGuess: data.user_guess,
 				correctGuess: data.correctGuess,
 				results: data.results,
 			};
