@@ -1,6 +1,6 @@
 import { Text } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
-
+import { Slot } from 'expo-router';
 import { useSession } from '../../ctx';
 
 export default function AppLayout() {
@@ -8,7 +8,7 @@ export default function AppLayout() {
 
 	// You can keep the splash screen open, or render a loading screen like we do here.
 	if (isLoading) {
-		return <Text>Loading...</Text>;
+		return <Text>Kachow</Text>;
 	}
 
 	// Only require authentication within the (app) group's layout as users
@@ -21,7 +21,9 @@ export default function AppLayout() {
 
 	// This layout can be deferred because it's not the root layout.
 	return (
-		<Stack>
+		<Stack screenOptions={{
+			contentStyle: { backgroundColor: 'black' },
+		}}>
 			<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 		</Stack>
 	);

@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { useSession } from '../../../ctx';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { getUserIdentificationHistory } from '@/lib/identification/IdentificationService';
 
 // Define types for our mock data
 type UserGuess = {
@@ -180,21 +182,30 @@ export default function HistoryScreen() {
 	const { session } = useSession();
 
 	// Using mock data directly instead of fetching from Firestore
-	const history = MOCK_HISTORY;
+	const [history, setHistory] = useState<any[]>([]);
 
-	const handleItemPress = (item: IdentificationRecord) => {
-		router.push({
-			pathname: '/result',
-			params: {
-				image_uri: item.imageUrl,
-				results: JSON.stringify(item.results),
-				user_guess: JSON.stringify(item.userGuess),
-			},
-		});
+	useEffect(() => {
+		if (!session?.uid) return;
+
+		const fetchHistory = async () => {
+			try {
+				const records = await getUserIdentificationHistory(session.uid);
+				setHistory(records);
+			} catch (error) {
+				console.error('Failed to load history:', error);
+			}
+		};
+
+		fetchHistory();
+		console.log(history)
+	}, [session?.uid]);
+
+	const handleItemPress = (item: any) => {
+		router.push(`/result/${item.id}`);
 	};
 
-	const formatDate = (date: Date) => {
-		// Simple date formatting without external dependency
+	const formatDate = (timestamp: any) => {
+		const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
 		return date.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
@@ -267,11 +278,13 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
+		backgroundColor: '#000', // Dark background
 	},
 	title: {
 		fontSize: 22,
 		fontWeight: 'bold',
 		marginBottom: 20,
+		color: '#fff',
 	},
 	list: {
 		paddingBottom: 20,
@@ -280,14 +293,14 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		padding: 15,
-		backgroundColor: 'white',
+		backgroundColor: '#121212', // Dark card background
 		borderRadius: 8,
 		marginBottom: 10,
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.1,
-		shadowRadius: 1,
-		elevation: 1,
+		shadowOpacity: 0.3,
+		shadowRadius: 3,
+		elevation: 2,
 	},
 	thumbnail: {
 		width: 60,
@@ -302,15 +315,16 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '500',
 		marginBottom: 4,
+		color: '#fff',
 	},
 	date: {
 		fontSize: 14,
-		color: '#666',
+		color: '#aaa',
 		marginBottom: 4,
 	},
 	guess: {
 		fontSize: 12,
-		color: '#888',
+		color: '#bbb',
 		fontStyle: 'italic',
 	},
 	resultBadge: {
@@ -319,15 +333,15 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	correctBadge: {
-		backgroundColor: '#e6f7ed',
+		backgroundColor: '#1b5e20',
 	},
 	incorrectBadge: {
-		backgroundColor: '#fdeded',
+		backgroundColor: '#b71c1c',
 	},
 	resultText: {
 		fontSize: 12,
 		fontWeight: '500',
-		color: '#333',
+		color: '#fff',
 	},
 	emptyState: {
 		flex: 1,
@@ -338,6 +352,6 @@ const styles = StyleSheet.create({
 	emptyText: {
 		textAlign: 'center',
 		fontSize: 16,
-		color: '#666',
+		color: '#999',
 	},
 });
