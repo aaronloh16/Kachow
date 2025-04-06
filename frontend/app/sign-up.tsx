@@ -72,39 +72,44 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		padding: 20,
-		backgroundColor: '#fff',
+		backgroundColor: '#000', // Instagram dark background
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
 		marginBottom: 20,
+		color: '#fff', // white title
 	},
 	input: {
 		width: '100%',
 		height: 50,
-		borderColor: '#ccc',
+		borderColor: '#333', // darker border for contrast
 		borderWidth: 1,
-		borderRadius: 5,
-		paddingHorizontal: 10,
+		borderRadius: 10,
+		paddingHorizontal: 15,
 		marginBottom: 15,
+		backgroundColor: '#121212', // dark input bg
+		color: '#fff',
 	},
 	error: {
-		color: 'red',
+		color: '#f44336',
 		marginBottom: 10,
+		fontSize: 14,
 	},
 	button: {
-		backgroundColor: '#4CAF50',
+		backgroundColor: '#f44336', // consistent primary color
 		paddingVertical: 12,
 		paddingHorizontal: 30,
 		borderRadius: 8,
+		marginBottom: 10,
 	},
 	buttonText: {
-		color: 'white',
+		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
 	},
 	link: {
-		color: '#2196F3',
+		color: '#3797EF', // Instagram link blue
 		fontSize: 14,
 		marginTop: 10,
 	},

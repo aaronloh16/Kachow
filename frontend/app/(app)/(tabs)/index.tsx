@@ -43,43 +43,38 @@ export default function HomeScreen() {
 		if (!image) return;
 
 		const imageUri = image.uri;
+		const userGuess = {
+			make: makeGuess.trim(),
+			model: modelGuess.trim(),
+		};
 		try {
-			setLoading(true);
-			setLoadingMessage('Uploading image...');
-
-			// const firebaseUrl = await uploadImageToFirebase(imageUri);
-			// console.log('Uploaded to:', firebaseUrl);
-
-			setLoadingMessage('Consulting the experts...');
+			router.push('/loading');
+			const firebaseUrl = await uploadImageToFirebase(imageUri);
+			console.log('Uploaded to:', firebaseUrl);
 
 			// Call Flask backend with that image URL
 			const res = await fetch('http://localhost:5001/identify', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					image_url:
-						'https://firebasestorage.googleapis.com/v0/b/kachow-6cbae.firebasestorage.app/o/uploads%2F1743551856537.jpg?alt=media&token=dbf69be1-d9f2-4999-8827-a0c9ec71831a',
+					image_url: firebaseUrl,
+					user_id: session?.uid,
+					user_guess: userGuess
 				}),
 			});
 
 			const data = await res.json();
 			console.log('Response from backend:', data);
 
-			// Package the user's guess
-			const userGuess = {
-				make: makeGuess.trim(),
-				model: modelGuess.trim(),
-			};
+			
 
 			// Navigate to results page with the data and user guess
-			router.push({
-				pathname: '/result',
-				params: {
-					image_uri: imageUri,
-					results: JSON.stringify(data),
-					user_guess: JSON.stringify(userGuess),
-				},
-			});
+			if (data.doc_id) {
+				router.push(`/result/${data.doc_id}` as any);
+				  
+			} else {
+				throw new Error('No doc_id returned');
+			}
 
 			// Reset the form
 			setMakeGuess('');

@@ -7,9 +7,14 @@ import {
 	ScrollView,
 	Pressable,
 	ActivityIndicator,
+	SafeAreaView,
+	Platform,
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
+import { getIdentificationById } from '@/lib/identification/IdentificationService';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSession } from '../../ctx'
+
 
 type ResultData = {
 	make: string;
@@ -92,11 +97,38 @@ function renderExpertResult(expertData: ResultData | null) {
 
 export default function ResultScreen() {
 	const params = useLocalSearchParams();
-	const image_uri = params.image_uri as string;
+	const { session } = useSession();
+	const identificationId = params.id as string;
+
 	const [results, setResults] = useState<ExpertResults | null>(null);
 	const [userGuess, setUserGuess] = useState<UserGuess | null>(null);
+	const [imageUri, setImageUri] = useState<string | null>(null);
+	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState('aggregated');
 	const [expandedSections, setExpandedSections] = useState<string[]>(['main']);
+
+	// Fetch from Firestore instead of parsing params
+	useEffect(() => {
+		async function fetchData() {
+			if (!identificationId || !session?.uid) return;
+			setLoading(true);
+			try {
+				const record = await getIdentificationById(session.uid, identificationId);
+				if (record) {
+					setImageUri(record.imageUrl);
+					setUserGuess(record.userGuess);
+					setResults(record.results as ExpertResults);
+					
+					
+				}
+			} catch (error) {
+				console.error('Failed to load Firestore result:', error);
+			} finally {
+				setLoading(false);
+			}
+		}
+		fetchData();
+	}, [identificationId, session?.uid]);
 
 	// Get confidence color
 	const getConfidenceColor = useCallback((confidence: string) => {
@@ -144,32 +176,7 @@ export default function ResultScreen() {
 		router.replace('/');
 	}, []);
 
-	// Retrieve results and user guess from params
-	useEffect(() => {
-		const resultsParam = params.results;
-		const userGuessParam = params.user_guess;
-
-		if (resultsParam) {
-			try {
-				const parsedResults = JSON.parse(
-					resultsParam as string
-				) as ExpertResults;
-				setResults(parsedResults);
-			} catch (error) {
-				console.error('Failed to parse results:', error);
-			}
-		}
-
-		if (userGuessParam) {
-			try {
-				const parsedGuess = JSON.parse(userGuessParam as string) as UserGuess;
-				setUserGuess(parsedGuess);
-			} catch (error) {
-				console.error('Failed to parse user guess:', error);
-			}
-		}
-	}, [params.results, params.user_guess]);
-
+	
 	// Check if user guess was correct
 	const isGuessCorrect = useCallback(() => {
 		if (!results || !userGuess || !userGuess.make || !userGuess.model)
@@ -183,12 +190,12 @@ export default function ResultScreen() {
 		return makeCorrect && modelCorrect;
 	}, [results, userGuess]);
 
-	if (!results) {
+	if (loading || !results) {
 		return (
-			<View style={styles.loadingContainer}>
+			<SafeAreaView style={styles.loadingContainer}>
 				<ActivityIndicator size="large" color="#0000ff" />
 				<Text style={styles.loadingText}>Loading results...</Text>
-			</View>
+			</SafeAreaView>
 		);
 	}
 
@@ -199,20 +206,22 @@ export default function ResultScreen() {
 	const guessCorrect = hasGuess && isGuessCorrect();
 
 	return (
-		<View style={styles.container}>
-			<Stack.Screen
-				options={{
-					title: 'Car Identification Results',
-					headerShown: true,
-				}}
-			/>
+		<SafeAreaView style={styles.container}>
+		<Stack.Screen
+			options={{
+				title: 'Results',
+				headerShown: true,
+				headerBackTitle: 'Back',
+				presentation: 'modal',
+			}}
+		/>
 
-			<ScrollView style={styles.scrollView}>
+			<ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
 				{/* Image Section */}
 				<View style={styles.imageContainer}>
-					{image_uri && (
+					{imageUri && (
 						<Image
-							source={{ uri: image_uri }}
+							source={{ uri: imageUri }}
 							style={styles.image}
 							resizeMode="cover"
 						/>
@@ -579,14 +588,15 @@ export default function ResultScreen() {
 					<Text style={styles.backButtonText}>Identify Another Car</Text>
 				</Pressable>
 			</ScrollView>
-		</View>
+		</SafeAreaView>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f5f5f5',
+		backgroundColor: '#000', // dark background
+		paddingTop: Platform.OS === 'android' ? 25 : 0,
 	},
 	scrollView: {
 		flex: 1,
@@ -599,6 +609,7 @@ const styles = StyleSheet.create({
 	loadingText: {
 		marginTop: 10,
 		fontSize: 16,
+		color: '#fff',
 	},
 	imageContainer: {
 		height: 250,
@@ -624,7 +635,7 @@ const styles = StyleSheet.create({
 		right: 20,
 	},
 	makeModel: {
-		color: 'white',
+		color: '#fff',
 		fontSize: 26,
 		fontWeight: 'bold',
 		textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -632,7 +643,7 @@ const styles = StyleSheet.create({
 		textShadowRadius: 10,
 	},
 	year: {
-		color: 'white',
+		color: '#ccc',
 		fontSize: 18,
 		marginTop: 4,
 		textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -641,28 +652,23 @@ const styles = StyleSheet.create({
 	},
 	mainResultContainer: {
 		margin: 16,
-		backgroundColor: 'white',
+		backgroundColor: '#121212',
 		borderRadius: 10,
 		overflow: 'hidden',
-		elevation: 2,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.22,
-		shadowRadius: 2.22,
 	},
 	sectionHeader: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		padding: 16,
-		backgroundColor: '#f9f9f9',
+		backgroundColor: '#1a1a1a',
 		borderBottomWidth: 1,
-		borderBottomColor: '#e0e0e0',
+		borderBottomColor: '#333',
 	},
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: 'bold',
-		color: '#333',
+		color: '#fff',
 	},
 	mainResultContent: {
 		padding: 16,
@@ -676,12 +682,12 @@ const styles = StyleSheet.create({
 		width: 120,
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#555',
+		color: '#bbb',
 	},
 	resultValue: {
 		flex: 1,
 		fontSize: 16,
-		color: '#333',
+		color: '#fff',
 	},
 	confidenceBadge: {
 		paddingHorizontal: 12,
@@ -689,7 +695,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 	},
 	confidenceText: {
-		color: 'white',
+		color: '#fff',
 		fontWeight: 'bold',
 		textTransform: 'uppercase',
 	},
@@ -697,30 +703,25 @@ const styles = StyleSheet.create({
 		marginTop: 8,
 		paddingTop: 12,
 		borderTopWidth: 1,
-		borderTopColor: '#e0e0e0',
+		borderTopColor: '#333',
 	},
 	detailsLabel: {
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#555',
+		color: '#bbb',
 		marginBottom: 8,
 	},
 	detailsText: {
 		fontSize: 14,
 		lineHeight: 22,
-		color: '#333',
+		color: '#ddd',
 	},
 	expertsContainer: {
 		margin: 16,
 		marginTop: 0,
-		backgroundColor: 'white',
+		backgroundColor: '#121212',
 		borderRadius: 10,
 		overflow: 'hidden',
-		elevation: 2,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.22,
-		shadowRadius: 2.22,
 	},
 	expertsContent: {
 		padding: 16,
@@ -728,7 +729,7 @@ const styles = StyleSheet.create({
 	tabsContainer: {
 		flexDirection: 'row',
 		borderBottomWidth: 1,
-		borderBottomColor: '#e0e0e0',
+		borderBottomColor: '#333',
 		marginBottom: 16,
 	},
 	tab: {
@@ -742,7 +743,7 @@ const styles = StyleSheet.create({
 	},
 	tabText: {
 		fontSize: 14,
-		color: '#666',
+		color: '#aaa',
 	},
 	activeTabText: {
 		color: '#3498db',
@@ -755,16 +756,16 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: 'bold',
 		marginBottom: 8,
-		color: '#333',
+		color: '#fff',
 	},
 	expertDescription: {
 		fontSize: 14,
-		color: '#666',
+		color: '#aaa',
 		marginBottom: 16,
 		fontStyle: 'italic',
 	},
 	expertDetails: {
-		backgroundColor: '#f5f5f5',
+		backgroundColor: '#1c1c1c',
 		padding: 12,
 		borderRadius: 8,
 	},
@@ -775,22 +776,23 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		backgroundColor: '#f0f0f0',
+		backgroundColor: '#222',
 		padding: 12,
 		borderRadius: 8,
 		marginBottom: 8,
 	},
 	activeRoundTab: {
-		backgroundColor: '#e6f2ff',
+		backgroundColor: '#2d2d2d',
 	},
 	roundText: {
 		fontSize: 14,
 		fontWeight: '600',
+		color: '#fff',
 	},
 	roundContent: {
 		marginBottom: 16,
 		padding: 12,
-		backgroundColor: '#f9f9f9',
+		backgroundColor: '#1a1a1a',
 		borderRadius: 8,
 	},
 	expertResultContainer: {
@@ -805,12 +807,12 @@ const styles = StyleSheet.create({
 		width: 100,
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#555',
+		color: '#aaa',
 	},
 	expertResultValue: {
 		flex: 1,
 		fontSize: 14,
-		color: '#333',
+		color: '#fff',
 	},
 	expertConfidenceBadge: {
 		paddingHorizontal: 10,
@@ -818,7 +820,7 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 	},
 	expertConfidenceText: {
-		color: 'white',
+		color: '#fff',
 		fontWeight: 'bold',
 		fontSize: 12,
 		textTransform: 'uppercase',
@@ -829,13 +831,13 @@ const styles = StyleSheet.create({
 	expertDetailsLabel: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#555',
+		color: '#bbb',
 		marginBottom: 4,
 	},
 	expertDetailsText: {
 		fontSize: 14,
 		lineHeight: 20,
-		color: '#333',
+		color: '#ddd',
 	},
 	errorText: {
 		color: '#f44336',
@@ -849,27 +851,22 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	backButtonText: {
-		color: 'white',
+		color: '#fff',
 		fontWeight: 'bold',
 		fontSize: 16,
 	},
 	guessContainer: {
 		margin: 16,
 		padding: 16,
-		backgroundColor: 'white',
+		backgroundColor: '#121212',
 		borderRadius: 10,
 		overflow: 'hidden',
-		elevation: 2,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.22,
-		shadowRadius: 2.22,
 	},
 	guessTitle: {
 		fontSize: 16,
 		fontWeight: '600',
 		marginBottom: 8,
-		color: '#555',
+		color: '#bbb',
 	},
 	guessContent: {
 		flexDirection: 'row',
@@ -879,7 +876,7 @@ const styles = StyleSheet.create({
 	guessText: {
 		fontSize: 18,
 		fontWeight: 'bold',
-		color: '#333',
+		color: '#fff',
 	},
 	guessResultBadge: {
 		paddingHorizontal: 12,
@@ -887,14 +884,15 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	correctBadge: {
-		backgroundColor: '#e6f7ed',
+		backgroundColor: '#005f3f',
 	},
 	incorrectBadge: {
-		backgroundColor: '#fdeded',
+		backgroundColor: '#5f0000',
 	},
 	guessResultText: {
 		fontSize: 12,
 		fontWeight: '500',
-		color: '#333',
+		color: '#fff',
 	},
 });
+
