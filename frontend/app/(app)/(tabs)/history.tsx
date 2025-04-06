@@ -1,45 +1,261 @@
-import { Text, View, StyleSheet, FlatList } from 'react-native';
+import {
+	Text,
+	View,
+	StyleSheet,
+	FlatList,
+	TouchableOpacity,
+	Image,
+} from 'react-native';
+import { useSession } from '../../../ctx';
+import { router } from 'expo-router';
 
-// Placeholder data for car identifications
-const MOCK_HISTORY = [
-	{ id: '1', date: '2023-03-25', car: 'Toyota Camry', correct: true },
-	{ id: '2', date: '2023-03-24', car: 'Honda Civic', correct: false },
-	{ id: '3', date: '2023-03-22', car: 'Ford Mustang', correct: true },
+// Define types for our mock data
+type UserGuess = {
+	make: string;
+	model: string;
+};
+
+type ResultData = {
+	make: string;
+	model: string;
+	year: string;
+	confidence: string;
+	details: string;
+};
+
+type IdentificationResult = {
+	aggregated: ResultData;
+	process: string;
+	openai: ResultData | { first_round: ResultData; second_round: ResultData };
+	gemini: ResultData | { first_round: ResultData; second_round: ResultData };
+	custom_model: ResultData;
+};
+
+type IdentificationRecord = {
+	id: string;
+	timestamp: Date;
+	imageUrl: string;
+	userGuess: UserGuess;
+	correctGuess: boolean;
+	results: IdentificationResult;
+};
+
+// Mock data for history
+const MOCK_HISTORY: IdentificationRecord[] = [
+	{
+		id: '1',
+		timestamp: new Date(2023, 11, 15),
+		imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d',
+		userGuess: { make: 'Ferrari', model: '458' },
+		correctGuess: false,
+		results: {
+			aggregated: {
+				make: 'Lamborghini',
+				model: 'Huracan',
+				year: '2020',
+				confidence: 'high',
+				details: 'Yellow sports car with distinctive Lamborghini styling.',
+			},
+			process: 'single_round',
+			openai: {
+				make: 'Lamborghini',
+				model: 'Huracan',
+				year: '2020',
+				confidence: 'high',
+				details: 'Yellow sports car with distinctive Lamborghini styling.',
+			},
+			gemini: {
+				make: 'Lamborghini',
+				model: 'Huracan',
+				year: '2020',
+				confidence: 'high',
+				details: 'Mid-engine sports car with V10 engine.',
+			},
+			custom_model: {
+				make: 'Lamborghini',
+				model: 'Huracan',
+				year: '2020',
+				confidence: 'medium',
+				details: 'Sports car with angular styling.',
+			},
+		},
+	},
+	{
+		id: '2',
+		timestamp: new Date(2023, 11, 10),
+		imageUrl: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
+		userGuess: { make: 'Ford', model: 'Mustang' },
+		correctGuess: true,
+		results: {
+			aggregated: {
+				make: 'Ford',
+				model: 'Mustang',
+				year: '2018',
+				confidence: 'high',
+				details: 'Classic American muscle car with iconic styling.',
+			},
+			process: 'single_round',
+			openai: {
+				make: 'Ford',
+				model: 'Mustang',
+				year: '2018',
+				confidence: 'high',
+				details: 'Classic American muscle car with iconic styling.',
+			},
+			gemini: {
+				make: 'Ford',
+				model: 'Mustang',
+				year: '2019',
+				confidence: 'medium',
+				details: 'American sports car with V8 engine.',
+			},
+			custom_model: {
+				make: 'Ford',
+				model: 'Mustang',
+				year: '2018',
+				confidence: 'high',
+				details: 'Muscle car with distinctive front grille.',
+			},
+		},
+	},
+	{
+		id: '3',
+		timestamp: new Date(2023, 11, 5),
+		imageUrl: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888',
+		userGuess: { make: 'Toyota', model: 'Camry' },
+		correctGuess: false,
+		results: {
+			aggregated: {
+				make: 'Honda',
+				model: 'Accord',
+				year: '2021',
+				confidence: 'high',
+				details: 'Midsize sedan with Honda styling cues and chrome grille.',
+			},
+			process: 'blackboard_two_rounds',
+			openai: {
+				first_round: {
+					make: 'Toyota',
+					model: 'Camry',
+					year: '2021',
+					confidence: 'medium',
+					details: 'Midsize sedan with modern styling.',
+				},
+				second_round: {
+					make: 'Honda',
+					model: 'Accord',
+					year: '2021',
+					confidence: 'high',
+					details: 'Midsize sedan with Honda styling cues and chrome grille.',
+				},
+			},
+			gemini: {
+				first_round: {
+					make: 'Hyundai',
+					model: 'Sonata',
+					year: '2020',
+					confidence: 'low',
+					details: 'Sedan with sleek styling.',
+				},
+				second_round: {
+					make: 'Honda',
+					model: 'Accord',
+					year: '2021',
+					confidence: 'high',
+					details: "Honda's flagship sedan with distinctive LED headlights.",
+				},
+			},
+			custom_model: {
+				make: 'Honda',
+				model: 'Accord',
+				year: '2021',
+				confidence: 'medium',
+				details: 'Sedan with Honda badge.',
+			},
+		},
+	},
 ];
 
 export default function HistoryScreen() {
+	const { session } = useSession();
+
+	// Using mock data directly instead of fetching from Firestore
+	const history = MOCK_HISTORY;
+
+	const handleItemPress = (item: IdentificationRecord) => {
+		router.push({
+			pathname: '/result',
+			params: {
+				image_uri: item.imageUrl,
+				results: JSON.stringify(item.results),
+				user_guess: JSON.stringify(item.userGuess),
+			},
+		});
+	};
+
+	const formatDate = (date: Date) => {
+		// Simple date formatting without external dependency
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		});
+	};
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Your Identification History</Text>
 
-			{MOCK_HISTORY.length > 0 ? (
+			{history.length > 0 ? (
 				<FlatList
-					data={MOCK_HISTORY}
+					data={history}
 					keyExtractor={(item) => item.id}
 					renderItem={({ item }) => (
-						<View style={styles.historyItem}>
-							<View>
-								<Text style={styles.carName}>{item.car}</Text>
-								<Text style={styles.date}>{item.date}</Text>
+						<TouchableOpacity
+							style={styles.historyItem}
+							onPress={() => handleItemPress(item)}
+						>
+							{item.imageUrl && (
+								<Image
+									source={{ uri: item.imageUrl }}
+									style={styles.thumbnail}
+									resizeMode="cover"
+								/>
+							)}
+							<View style={styles.itemInfo}>
+								<Text style={styles.carName}>
+									{item.results.aggregated.make} {item.results.aggregated.model}
+								</Text>
+								<Text style={styles.date}>{formatDate(item.timestamp)}</Text>
+								{item.userGuess &&
+									(item.userGuess.make || item.userGuess.model) && (
+										<Text style={styles.guess}>
+											Your guess: {item.userGuess.make} {item.userGuess.model}
+										</Text>
+									)}
 							</View>
 							<View
 								style={[
 									styles.resultBadge,
-									item.correct ? styles.correctBadge : styles.incorrectBadge,
+									item.correctGuess
+										? styles.correctBadge
+										: styles.incorrectBadge,
 								]}
 							>
 								<Text style={styles.resultText}>
-									{item.correct ? 'Correct' : 'Incorrect'}
+									{item.correctGuess ? 'Correct' : 'Incorrect'}
 								</Text>
 							</View>
-						</View>
+						</TouchableOpacity>
 					)}
 					contentContainerStyle={styles.list}
 				/>
 			) : (
 				<View style={styles.emptyState}>
 					<Text style={styles.emptyText}>
-						No identifications yet. Take some photos to get started!
+						{session?.uid
+							? 'No identifications yet. Take some photos to get started!'
+							: 'Please sign in to see your identification history'}
 					</Text>
 				</View>
 			)}
@@ -62,7 +278,6 @@ const styles = StyleSheet.create({
 	},
 	historyItem: {
 		flexDirection: 'row',
-		justifyContent: 'space-between',
 		alignItems: 'center',
 		padding: 15,
 		backgroundColor: 'white',
@@ -74,6 +289,15 @@ const styles = StyleSheet.create({
 		shadowRadius: 1,
 		elevation: 1,
 	},
+	thumbnail: {
+		width: 60,
+		height: 60,
+		borderRadius: 4,
+		marginRight: 12,
+	},
+	itemInfo: {
+		flex: 1,
+	},
 	carName: {
 		fontSize: 16,
 		fontWeight: '500',
@@ -82,6 +306,12 @@ const styles = StyleSheet.create({
 	date: {
 		fontSize: 14,
 		color: '#666',
+		marginBottom: 4,
+	},
+	guess: {
+		fontSize: 12,
+		color: '#888',
+		fontStyle: 'italic',
 	},
 	resultBadge: {
 		paddingHorizontal: 12,

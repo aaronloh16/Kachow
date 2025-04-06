@@ -28,6 +28,11 @@ type ExpertResults = {
 	process: 'single_round' | 'blackboard_two_rounds';
 };
 
+type UserGuess = {
+	make: string;
+	model: string;
+};
+
 // Helper function to render a single expert result
 function renderExpertResult(expertData: ResultData | null) {
 	if (!expertData) return <Text>No data available</Text>;
@@ -89,6 +94,7 @@ export default function ResultScreen() {
 	const params = useLocalSearchParams();
 	const image_uri = params.image_uri as string;
 	const [results, setResults] = useState<ExpertResults | null>(null);
+	const [userGuess, setUserGuess] = useState<UserGuess | null>(null);
 	const [activeTab, setActiveTab] = useState('aggregated');
 	const [expandedSections, setExpandedSections] = useState<string[]>(['main']);
 
@@ -138,9 +144,11 @@ export default function ResultScreen() {
 		router.replace('/');
 	}, []);
 
-	// Retrieve results from params
+	// Retrieve results and user guess from params
 	useEffect(() => {
 		const resultsParam = params.results;
+		const userGuessParam = params.user_guess;
+
 		if (resultsParam) {
 			try {
 				const parsedResults = JSON.parse(
@@ -151,7 +159,29 @@ export default function ResultScreen() {
 				console.error('Failed to parse results:', error);
 			}
 		}
-	}, [params.results]);
+
+		if (userGuessParam) {
+			try {
+				const parsedGuess = JSON.parse(userGuessParam as string) as UserGuess;
+				setUserGuess(parsedGuess);
+			} catch (error) {
+				console.error('Failed to parse user guess:', error);
+			}
+		}
+	}, [params.results, params.user_guess]);
+
+	// Check if user guess was correct
+	const isGuessCorrect = useCallback(() => {
+		if (!results || !userGuess || !userGuess.make || !userGuess.model)
+			return false;
+
+		const makeCorrect =
+			userGuess.make.toLowerCase() === results.aggregated.make.toLowerCase();
+		const modelCorrect =
+			userGuess.model.toLowerCase() === results.aggregated.model.toLowerCase();
+
+		return makeCorrect && modelCorrect;
+	}, [results, userGuess]);
 
 	if (!results) {
 		return (
@@ -165,6 +195,8 @@ export default function ResultScreen() {
 	// Get the main result from aggregated
 	const mainResult = results.aggregated;
 	const isBlackboard = results.process === 'blackboard_two_rounds';
+	const hasGuess = userGuess && (userGuess.make || userGuess.model);
+	const guessCorrect = hasGuess && isGuessCorrect();
 
 	return (
 		<View style={styles.container}>
@@ -197,6 +229,28 @@ export default function ResultScreen() {
 						</Text>
 					</View>
 				</View>
+
+				{/* User Guess Section (if available) */}
+				{hasGuess && (
+					<View style={styles.guessContainer}>
+						<Text style={styles.guessTitle}>Your Guess:</Text>
+						<View style={styles.guessContent}>
+							<Text style={styles.guessText}>
+								{userGuess.make} {userGuess.model}
+							</Text>
+							<View
+								style={[
+									styles.guessResultBadge,
+									guessCorrect ? styles.correctBadge : styles.incorrectBadge,
+								]}
+							>
+								<Text style={styles.guessResultText}>
+									{guessCorrect ? 'Correct!' : 'Incorrect'}
+								</Text>
+							</View>
+						</View>
+					</View>
+				)}
 
 				{/* Main Identification Result */}
 				<View style={styles.mainResultContainer}>
@@ -798,5 +852,49 @@ const styles = StyleSheet.create({
 		color: 'white',
 		fontWeight: 'bold',
 		fontSize: 16,
+	},
+	guessContainer: {
+		margin: 16,
+		padding: 16,
+		backgroundColor: 'white',
+		borderRadius: 10,
+		overflow: 'hidden',
+		elevation: 2,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.22,
+		shadowRadius: 2.22,
+	},
+	guessTitle: {
+		fontSize: 16,
+		fontWeight: '600',
+		marginBottom: 8,
+		color: '#555',
+	},
+	guessContent: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	guessText: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#333',
+	},
+	guessResultBadge: {
+		paddingHorizontal: 12,
+		paddingVertical: 6,
+		borderRadius: 20,
+	},
+	correctBadge: {
+		backgroundColor: '#e6f7ed',
+	},
+	incorrectBadge: {
+		backgroundColor: '#fdeded',
+	},
+	guessResultText: {
+		fontSize: 12,
+		fontWeight: '500',
+		color: '#333',
 	},
 });
