@@ -13,7 +13,8 @@ import {
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { getIdentificationById } from '@/lib/identification/IdentificationService';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useSession } from '../../ctx'
+import { useSession } from '../../../ctx'
+import { MyDarkTheme } from '@/assets/theme';
 
 
 type ResultData = {
@@ -207,15 +208,15 @@ export default function ResultScreen() {
 
 	return (
 		<SafeAreaView style={styles.container}>
-		<Stack.Screen
-			options={{
-				title: 'Results',
-				headerShown: true,
-				headerBackTitle: 'Back',
-				presentation: 'modal',
-			}}
-		/>
-
+			<Stack.Screen
+				options={{
+					title: 'Results',
+					headerShown: true,
+					headerBackButtonDisplayMode: 'minimal',
+					headerStyle: { backgroundColor: MyDarkTheme.colors.card },
+					headerTintColor: MyDarkTheme.colors.text, // or use white if you want
+				}}
+			/>
 			<ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
 				{/* Image Section */}
 				<View style={styles.imageContainer}>

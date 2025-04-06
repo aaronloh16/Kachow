@@ -13,6 +13,7 @@ import { AccountManager } from './lib/auth/AccountManager';
 const accountManager = new AccountManager();
 
 const AuthContext = createContext<{
+	refreshSession: () => Promise<void>;
 	signIn: (email: string, password: string) => Promise<void>;
 	signUp: (email: string, password: string, displayName: string) => Promise<void>;
 	signOut: () => void;
@@ -39,6 +40,13 @@ export function SessionProvider({ children }: PropsWithChildren) {
 		});
 		return unsubscribe;
 	}, []);
+	
+	const refreshSession = async () => {
+		if (auth.currentUser) {
+			await auth.currentUser.reload();
+			setSession(auth.currentUser);
+		}
+	};
 
 	const signIn = async (email: string, password: string) => {
 		const user = await accountManager.authenticate(email, password);
@@ -63,6 +71,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 				signOut,
 				session,
 				isLoading,
+				refreshSession,
 			}}
 		>
 			{children}

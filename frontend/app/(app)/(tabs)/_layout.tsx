@@ -1,11 +1,18 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { MyDarkTheme } from '@/assets/theme';
 
 export default function TabsLayout() {
 	return (
 		<Tabs
 			screenOptions={{
-				tabBarActiveTintColor: '#f44336',
+				tabBarStyle: { backgroundColor: MyDarkTheme.colors.card },
+				tabBarActiveTintColor: MyDarkTheme.colors.primary,
+				tabBarInactiveTintColor: '#aaa',
+				headerStyle: { backgroundColor: MyDarkTheme.colors.card },
+				headerTintColor: 'white',
+				tabBarLabelStyle: { fontSize: 12 },
+				
 			}}
 		>
 			<Tabs.Screen
@@ -23,6 +30,15 @@ export default function TabsLayout() {
 					title: 'History',
 					tabBarIcon: ({ color }) => (
 						<Ionicons name="time" size={24} color={color} />
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="account"
+				options={{
+					title: 'Account',
+					tabBarIcon: ({ color }) => (
+						<Ionicons name="person" size={24} color={color} />
 					),
 				}}
 			/>

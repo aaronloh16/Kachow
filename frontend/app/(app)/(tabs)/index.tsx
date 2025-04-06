@@ -7,22 +7,29 @@ import {
 	Modal,
 	TextInput,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToFirebase } from '../../../lib/image/upload';
 import { useSession } from '../../../ctx';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
 
 export default function HomeScreen() {
-	const { signOut, session } = useSession();
+	const { signOut, session, refreshSession} = useSession();
 	const [loading, setLoading] = useState(false);
 	const [loadingMessage, setLoadingMessage] = useState('Processing image...');
 	const [image, setImage] = useState<ImagePickerAsset | null>(null);
 	const [showGuessModal, setShowGuessModal] = useState(false);
 	const [makeGuess, setMakeGuess] = useState('');
 	const [modelGuess, setModelGuess] = useState('');
+	
+
+	useFocusEffect(
+		useCallback(() => {
+			refreshSession(); // Always refresh on screen focus
+		}, [])
+	);
 
 	const handleImagePick = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,7 +60,7 @@ export default function HomeScreen() {
 			console.log('Uploaded to:', firebaseUrl);
 
 			// Call Flask backend with that image URL
-			const res = await fetch('http://localhost:5001/identify', {
+			const res = await fetch('http://192.168.2.242:5001/identify', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -173,22 +180,25 @@ export default function HomeScreen() {
 	);
 }
 
+// 📍 For HomeScreen
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+		backgroundColor: '#000',
 		padding: 20,
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
 		marginBottom: 10,
+		color: '#fff',
 	},
 	subtitle: {
 		fontSize: 16,
 		marginBottom: 30,
-		color: '#666',
+		color: '#aaa',
 	},
 	cameraButton: {
 		backgroundColor: '#f44336',
@@ -198,7 +208,7 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	buttonText: {
-		color: 'white',
+		color: '#fff',
 		fontSize: 16,
 		fontWeight: 'bold',
 	},
@@ -216,7 +226,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	modalContent: {
-		backgroundColor: 'white',
+		backgroundColor: '#121212',
 		width: '80%',
 		borderRadius: 10,
 		padding: 20,
@@ -226,18 +236,22 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		marginBottom: 20,
 		textAlign: 'center',
+		color: '#fff',
 	},
 	inputLabel: {
 		fontSize: 14,
 		marginBottom: 5,
 		fontWeight: '500',
+		color: '#aaa',
 	},
 	input: {
 		borderWidth: 1,
-		borderColor: '#ddd',
+		borderColor: '#333',
 		borderRadius: 5,
 		padding: 10,
 		marginBottom: 15,
+		color: '#fff',
+		backgroundColor: '#1a1a1a',
 	},
 	modalButtons: {
 		flexDirection: 'row',
@@ -252,16 +266,16 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	skipButton: {
-		backgroundColor: '#f5f5f5',
+		backgroundColor: '#333',
 	},
 	skipButtonText: {
-		color: '#666',
+		color: '#aaa',
 	},
 	submitButton: {
 		backgroundColor: '#f44336',
 	},
 	submitButtonText: {
-		color: 'white',
+		color: '#fff',
 		fontWeight: 'bold',
 	},
 });

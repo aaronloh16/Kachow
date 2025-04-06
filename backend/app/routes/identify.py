@@ -49,7 +49,7 @@ def identify_car():
         gemini_result = gemini_handler.identify_car(image_url)
         openai_result = openai_handler.identify_car(image_url)
         custom_model_result = custom_model_handler.identify_car(image_url)
-        openai_result = {'make': 'Ford', 'model': 'Transit Custom', 'year': '2018', 'confidence': 'high', 'details': "The vehicle's front design and badges are consistent with the Ford Transit Custom model, particularly from the 2018 generation."}
+        #openai_result = {'make': 'Ford', 'model': 'Transit Custom', 'year': '2018', 'confidence': 'high', 'details': "The vehicle's front design and badges are consistent with the Ford Transit Custom model, particularly from the 2018 generation."}
         print("Gemini Result:", gemini_result)
         print("OpenAI Result:", openai_result)
         print("Custom Model Result:", custom_model_result)
@@ -93,7 +93,7 @@ def identify_car():
             # Second round - with context
 
 
-            openai_second_result = openai_result#openai_handler.identify_car(image_url, openai_context)
+            openai_second_result = openai_handler.identify_car(image_url, openai_context)
             gemini_second_result = gemini_handler.identify_car(image_url, gemini_context)
             
             print("OpenAI Second Round Result:", openai_second_result)
