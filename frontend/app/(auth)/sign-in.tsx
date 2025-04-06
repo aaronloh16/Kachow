@@ -13,6 +13,7 @@ import { useFonts } from 'expo-font';
 import { useSession } from '../../ctx';
 import { router } from 'expo-router';
 
+const backgroundImage = require('../../assets/images/background.jpg');
 
 export default function SignIn() {
 	const { signIn } = useSession();
@@ -30,43 +31,44 @@ export default function SignIn() {
 	};
 
 	return (
-		<SafeAreaView style={{ flex: 1 }}>
-			<View style={styles.container}>
-				<Text style={styles.kachowTitle}>KACHOW</Text>
-				<Text style={styles.subtitle}>Identify cars like never before!</Text>
+		<ImageBackground source={backgroundImage} style={styles.background} resizeMode="cover">
+			<SafeAreaView style={{ flex: 1 }}>
+				<View style={styles.container}>
+					<Text style={styles.kachowTitle}>KACHOW</Text>
+					<Text style={styles.subtitle}>Identify cars like never before!</Text>
 
-				<TextInput
-					style={styles.input}
-					placeholder="Email"
-					placeholderTextColor="#777"
-					autoCapitalize="none"
-					onChangeText={setEmail}
-					value={email}
-				/>
+					<TextInput
+						style={styles.input}
+						placeholder="Email"
+						placeholderTextColor="#777"
+						autoCapitalize="none"
+						onChangeText={setEmail}
+						value={email}
+					/>
 
-				<TextInput
-					style={styles.input}
-					placeholder="Password"
-					placeholderTextColor="#777"
-					secureTextEntry
-					onChangeText={setPassword}
-					value={password}
-				/>
+					<TextInput
+						style={styles.input}
+						placeholder="Password"
+						placeholderTextColor="#777"
+						secureTextEntry
+						onChangeText={setPassword}
+						value={password}
+					/>
 
-				{error ? <Text style={styles.error}>{error}</Text> : null}
+					{error ? <Text style={styles.error}>{error}</Text> : null}
 
-				<TouchableOpacity style={styles.button} onPress={handleLogin}>
-					<Text style={styles.buttonText}>Sign In</Text>
-				</TouchableOpacity>
+					<TouchableOpacity style={styles.button} onPress={handleLogin}>
+						<Text style={styles.buttonText}>Sign In</Text>
+					</TouchableOpacity>
 
-				<TouchableOpacity onPress={() => router.push('/sign-up')}>
-					<Text style={styles.link}>Don't have an account? Sign up</Text>
-				</TouchableOpacity>
-			</View>
-		</SafeAreaView>
+					<TouchableOpacity onPress={() => router.push('/sign-up')}>
+						<Text style={styles.link}>Don't have an account? Sign up</Text>
+					</TouchableOpacity>
+				</View>
+			</SafeAreaView>
+		</ImageBackground>
 	);
 }
-
 
 const styles = StyleSheet.create({
 	background: { flex: 1, width: '100%', height: '100%' },
