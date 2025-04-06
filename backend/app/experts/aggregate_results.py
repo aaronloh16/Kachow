@@ -36,12 +36,18 @@ Analyze these results and provide a final determination.
 - If there's agreement between OpenAI and Gemini, that should generally be your answer.
 - If there's disagreement, use your judgment based on the confidence levels and details provided.
 
+Once you've identified the car, provide 2-3 interesting facts about this specific model to include in details field, such as:
+- Historical significance or notable innovations
+- Performance specifications or special features
+- Cultural impact or appearances in popular media
+- Any unusual or unique aspects of this particular model
+
 Return a JSON object with these keys:
 - make: the final determination of the car's manufacturer
 - model: the final determination of the car model
 - year: the estimated year or generation
 - confidence: your overall confidence (high, medium, low)
-- details: a brief explanation of your reasoning, mentioning which experts agreed
+- details: a brief explanation of your reasoning, followed by interesting facts about the identified car
 
 Respond ONLY with valid JSON. No markdown, no text outside of JSON.
 """

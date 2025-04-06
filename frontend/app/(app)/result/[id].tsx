@@ -13,9 +13,8 @@ import {
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { getIdentificationById } from '@/lib/identification/IdentificationService';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useSession } from '../../../ctx'
+import { useSession } from '../../../ctx';
 import { MyDarkTheme } from '@/assets/theme';
-
 
 type ResultData = {
 	make: string;
@@ -89,7 +88,9 @@ function renderExpertResult(expertData: ResultData | null) {
 				</View>
 			</View>
 			<View style={styles.expertDetailsContainer}>
-				<Text style={styles.expertDetailsLabel}>Details:</Text>
+				<Text style={styles.expertDetailsLabel}>
+					Details and interesting facts:
+				</Text>
 				<Text style={styles.expertDetailsText}>{expertData.details}</Text>
 			</View>
 		</View>
@@ -114,13 +115,14 @@ export default function ResultScreen() {
 			if (!identificationId || !session?.uid) return;
 			setLoading(true);
 			try {
-				const record = await getIdentificationById(session.uid, identificationId);
+				const record = await getIdentificationById(
+					session.uid,
+					identificationId
+				);
 				if (record) {
 					setImageUri(record.imageUrl);
 					setUserGuess(record.userGuess);
 					setResults(record.results as ExpertResults);
-					
-					
 				}
 			} catch (error) {
 				console.error('Failed to load Firestore result:', error);
@@ -177,7 +179,6 @@ export default function ResultScreen() {
 		router.replace('/');
 	}, []);
 
-	
 	// Check if user guess was correct
 	const isGuessCorrect = useCallback(() => {
 		if (!results || !userGuess || !userGuess.make || !userGuess.model)
@@ -318,7 +319,9 @@ export default function ResultScreen() {
 								</Text>
 							</View>
 							<View style={styles.detailsContainer}>
-								<Text style={styles.detailsLabel}>Details:</Text>
+								<Text style={styles.detailsLabel}>
+									Details and interesting facts:
+								</Text>
 								<Text style={styles.detailsText}>{mainResult.details}</Text>
 							</View>
 						</View>
@@ -420,6 +423,9 @@ export default function ResultScreen() {
 											confidence and expertise.
 										</Text>
 										<View style={styles.expertDetails}>
+											<Text style={styles.expertDetailsTitle}>
+												Details and interesting facts:
+											</Text>
 											<Text style={styles.detailsText}>
 												{mainResult.details}
 											</Text>
@@ -895,5 +901,10 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 		color: '#fff',
 	},
+	expertDetailsTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginBottom: 8,
+		color: '#fff',
+	},
 });
-
