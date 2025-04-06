@@ -1,4 +1,12 @@
-import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {
+	Text,
+	View,
+	StyleSheet,
+	TouchableOpacity,
+	Alert,
+	Modal,
+	TextInput,
+} from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToFirebase } from '../../../lib/image/upload';
@@ -12,52 +20,91 @@ export default function HomeScreen() {
 	const [loading, setLoading] = useState(false);
 	const [loadingMessage, setLoadingMessage] = useState('Processing image...');
 	const [image, setImage] = useState<ImagePickerAsset | null>(null);
+	const [showGuessModal, setShowGuessModal] = useState(false);
+	const [makeGuess, setMakeGuess] = useState('');
+	const [modelGuess, setModelGuess] = useState('');
 
-	const handlePickAndUpload = async () => {
+	const handleImagePick = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
 			quality: 1,
 		});
 
 		if (!result.canceled && result.assets.length > 0) {
-			const imageUri = result.assets[0].uri;
-			try {
-				setLoading(true);
-				setLoadingMessage('Uploading image...');
+			setImage(result.assets[0]);
+			// Show the guess modal to let the user enter their guess
+			setShowGuessModal(true);
+		}
+	};
 
-				// const firebaseUrl = await uploadImageToFirebase(imageUri);
-				// console.log('Uploaded to:', firebaseUrl);
+	const handleSubmitGuess = async () => {
+		setShowGuessModal(false);
 
-				setLoadingMessage('Consulting the experts...');
+		if (!image) return;
 
-				// Call Flask backend with that image URL
-				const res = await fetch('http://localhost:5001/identify', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						image_url:
-							'https://firebasestorage.googleapis.com/v0/b/kachow-6cbae.firebasestorage.app/o/uploads%2F1743551856537.jpg?alt=media&token=dbf69be1-d9f2-4999-8827-a0c9ec71831a',
-					}),
-				});
+		const imageUri = image.uri;
+		try {
+			setLoading(true);
+			setLoadingMessage('Uploading image...');
 
-				const data = await res.json();
-				console.log('Response from backend:', data);
+			// const firebaseUrl = await uploadImageToFirebase(imageUri);
+			// console.log('Uploaded to:', firebaseUrl);
 
-				// Navigate to results page with the data
-				router.push({
-					pathname: '/result',
-					params: {
-						image_uri: imageUri,
-						results: JSON.stringify(data),
-					},
-				});
+			setLoadingMessage('Consulting the experts...');
 
-				setLoading(false);
-			} catch (err) {
-				console.error(err);
-				setLoading(false);
-				Alert.alert('Upload failed', 'Could not identify the image.');
-			}
+			// Call Flask backend with that image URL
+			const res = await fetch('http://localhost:5001/identify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					image_url:
+						'https://firebasestorage.googleapis.com/v0/b/kachow-6cbae.firebasestorage.app/o/uploads%2F1743551856537.jpg?alt=media&token=dbf69be1-d9f2-4999-8827-a0c9ec71831a',
+				}),
+			});
+
+			const data = await res.json();
+			console.log('Response from backend:', data);
+
+			// Package the user's guess
+			const userGuess = {
+				make: makeGuess.trim(),
+				model: modelGuess.trim(),
+			};
+
+			// Navigate to results page with the data and user guess
+			router.push({
+				pathname: '/result',
+				params: {
+					image_uri: imageUri,
+					results: JSON.stringify(data),
+					user_guess: JSON.stringify(userGuess),
+				},
+			});
+
+			// Reset the form
+			setMakeGuess('');
+			setModelGuess('');
+			setImage(null);
+			setLoading(false);
+		} catch (err) {
+			console.error(err);
+			setLoading(false);
+			Alert.alert('Upload failed', 'Could not identify the image.');
+		}
+	};
+
+	const handleSkipGuess = () => {
+		setShowGuessModal(false);
+
+		// Package an empty guess
+		const userGuess = {
+			make: '',
+			model: '',
+		};
+
+		// Proceed with the image processing
+		if (image) {
+			handleSubmitGuess();
 		}
 	};
 
@@ -66,14 +113,61 @@ export default function HomeScreen() {
 			{/* Loading overlay */}
 			<LoadingOverlay visible={loading} message={loadingMessage} />
 
+			{/* Guess Modal */}
+			<Modal
+				visible={showGuessModal}
+				transparent={true}
+				animationType="slide"
+				onRequestClose={() => setShowGuessModal(false)}
+			>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalContent}>
+						<Text style={styles.modalTitle}>
+							What car do you think this is?
+						</Text>
+
+						<Text style={styles.inputLabel}>Make</Text>
+						<TextInput
+							style={styles.input}
+							placeholder="e.g. Toyota, Honda, BMW"
+							value={makeGuess}
+							onChangeText={setMakeGuess}
+							autoCapitalize="words"
+						/>
+
+						<Text style={styles.inputLabel}>Model</Text>
+						<TextInput
+							style={styles.input}
+							placeholder="e.g. Camry, Civic, M3"
+							value={modelGuess}
+							onChangeText={setModelGuess}
+							autoCapitalize="words"
+						/>
+
+						<View style={styles.modalButtons}>
+							<TouchableOpacity
+								style={[styles.modalButton, styles.skipButton]}
+								onPress={handleSkipGuess}
+							>
+								<Text style={styles.skipButtonText}>Skip</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={[styles.modalButton, styles.submitButton]}
+								onPress={handleSubmitGuess}
+							>
+								<Text style={styles.submitButtonText}>Submit</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</Modal>
+
 			<Text style={styles.title}>Hi {session?.displayName}!</Text>
 			<Text style={styles.title}>Welcome to Kachow!</Text>
 			<Text style={styles.subtitle}>Ready to identify some cars?</Text>
 
-			<TouchableOpacity
-				style={styles.cameraButton}
-				onPress={handlePickAndUpload}
-			>
+			<TouchableOpacity style={styles.cameraButton} onPress={handleImagePick}>
 				<Text style={styles.buttonText}>Upload Car Photo</Text>
 			</TouchableOpacity>
 
@@ -119,5 +213,60 @@ const styles = StyleSheet.create({
 	signOutText: {
 		color: '#f44336',
 		fontSize: 14,
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalContent: {
+		backgroundColor: 'white',
+		width: '80%',
+		borderRadius: 10,
+		padding: 20,
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginBottom: 20,
+		textAlign: 'center',
+	},
+	inputLabel: {
+		fontSize: 14,
+		marginBottom: 5,
+		fontWeight: '500',
+	},
+	input: {
+		borderWidth: 1,
+		borderColor: '#ddd',
+		borderRadius: 5,
+		padding: 10,
+		marginBottom: 15,
+	},
+	modalButtons: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginTop: 10,
+	},
+	modalButton: {
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 5,
+		minWidth: 100,
+		alignItems: 'center',
+	},
+	skipButton: {
+		backgroundColor: '#f5f5f5',
+	},
+	skipButtonText: {
+		color: '#666',
+	},
+	submitButton: {
+		backgroundColor: '#f44336',
+	},
+	submitButtonText: {
+		color: 'white',
+		fontWeight: 'bold',
 	},
 });
