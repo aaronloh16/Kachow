@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { MyDarkTheme } from '@/assets/theme';
+import { MyDarkTheme } from '../../../assets/theme';
 
 export default function TabsLayout() {
 	return (

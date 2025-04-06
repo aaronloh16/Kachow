@@ -9,8 +9,7 @@ import {
 import { useSession } from '../../../ctx';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { getUserIdentificationHistory } from '@/lib/identification/IdentificationService';
-
+import { getUserIdentificationHistory } from '../../../lib/identification/IdentificationService';
 // Define types for our mock data
 type UserGuess = {
 	make: string;

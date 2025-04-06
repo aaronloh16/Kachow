@@ -11,10 +11,10 @@ import {
 	Platform,
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { getIdentificationById } from '@/lib/identification/IdentificationService';
+import { getIdentificationById } from '../../../lib/identification/IdentificationService';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSession } from '../../../ctx'
-import { MyDarkTheme } from '@/assets/theme';
+import { MyDarkTheme } from '../../../assets/theme';
 
 
 type ResultData = {

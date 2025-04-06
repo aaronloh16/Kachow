@@ -2,7 +2,7 @@
 import { useCallback, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { updateProfile, updateEmail, updatePassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase'; // adjust import path as needed
+import { auth } from '../../../lib/firebase'; // adjust import path as needed
 import { useSession } from '../../../ctx';
 import { router, useFocusEffect } from 'expo-router';
 
