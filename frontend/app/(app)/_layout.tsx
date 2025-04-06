@@ -21,7 +21,9 @@ export default function AppLayout() {
 
 	// This layout can be deferred because it's not the root layout.
 	return (
-		<Stack>
+		<Stack screenOptions={{
+			contentStyle: { backgroundColor: 'black' },
+		}}>
 			<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 		</Stack>
 	);

@@ -1,13 +1,13 @@
 // app/(app)/(tabs)/account.tsx
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { updateProfile, updateEmail, updatePassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase'; // adjust import path as needed
 import { useSession } from '../../../ctx';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 export default function AccountScreen() {
-	const { session } = useSession();
+	const { session, refreshSession} = useSession();
 	const user = auth.currentUser;
 
 	const [displayName, setDisplayName] = useState(user?.displayName || '');
@@ -29,6 +29,8 @@ export default function AccountScreen() {
 			if (password.length > 5) {
 				await updatePassword(user, password);
 			}
+
+			await refreshSession();
 
 			Alert.alert(
                 'Profile Updated',
