@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { useSession } from '../ctx';
+import { useSession } from '../../ctx';
 import { router } from 'expo-router';
 
 export default function SignUp() {
@@ -59,7 +59,7 @@ export default function SignUp() {
 				<Text style={styles.buttonText}>Sign Up</Text>
 			</TouchableOpacity>
 
-			<TouchableOpacity onPress={() => router.push('/sign-in')}>
+			<TouchableOpacity onPress={() => router.replace('/sign-in')}>
 				<Text style={styles.link}>Already have an account? Sign in</Text>
 			</TouchableOpacity>
 		</View>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		padding: 20,
-		backgroundColor: '#000', // Instagram dark background
+		backgroundColor: '#000', 
 	},
 	title: {
 		fontSize: 24,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	link: {
-		color: '#3797EF', // Instagram link blue
+		color: '#3797EF', 
 		fontSize: 14,
 		marginTop: 10,
 	},
