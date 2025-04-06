@@ -89,8 +89,8 @@ export async function getUserIdentificationHistory(
 			history.push({
 				id: doc.id,
 				timestamp: data.timestamp,
-				imageUrl: data.image_url,
-				userGuess: data.user_guess,
+				imageUrl: data.imageUrl || data.image_url,
+				userGuess: data.userGuess || data.user_guess,
 				correctGuess: data.correctGuess,
 				results: data.results,
 			});
@@ -122,8 +122,8 @@ export async function getIdentificationById(
 			return {
 				id: docSnap.id,
 				timestamp: data.timestamp,
-				imageUrl: data.image_url,
-				userGuess: data.user_guess,
+				imageUrl: data.imageUrl || data.image_url,
+				userGuess: data.userGuess || data.user_guess,
 				correctGuess: data.correctGuess,
 				results: data.results,
 			};

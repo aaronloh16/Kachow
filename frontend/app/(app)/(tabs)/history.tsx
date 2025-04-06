@@ -178,6 +178,24 @@ const MOCK_HISTORY: IdentificationRecord[] = [
 	},
 ];
 
+// Function to check if user's guess matches the identified car
+function checkGuessAccuracy(
+	userGuess: UserGuess | undefined | null,
+	result: { make: string; model: string } | undefined | null
+): boolean {
+	if (!userGuess || !result || !userGuess.make || !userGuess.model) {
+		return false;
+	}
+
+	// Simple string matching (case insensitive)
+	const makeCorrect =
+		userGuess.make.toLowerCase() === result.make.toLowerCase();
+	const modelCorrect =
+		userGuess.model.toLowerCase() === result.model.toLowerCase();
+
+	return makeCorrect && modelCorrect;
+}
+
 export default function HistoryScreen() {
 	const { session } = useSession();
 
@@ -197,7 +215,7 @@ export default function HistoryScreen() {
 		};
 
 		fetchHistory();
-		console.log(history)
+		console.log(history);
 	}, [session?.uid]);
 
 	const handleItemPress = (item: any) => {
@@ -211,6 +229,18 @@ export default function HistoryScreen() {
 			month: 'short',
 			day: 'numeric',
 		});
+	};
+
+	// Determine if a guess is correct based on real-time calculation or stored value
+	const isGuessCorrect = (item: any) => {
+		// Calculate correctness in real-time using same logic as result page
+		const calculatedCorrectness = checkGuessAccuracy(
+			item.userGuess,
+			item.results?.aggregated
+		);
+
+		// Use calculated value or fall back to stored value
+		return calculatedCorrectness;
 	};
 
 	return (
@@ -248,13 +278,13 @@ export default function HistoryScreen() {
 							<View
 								style={[
 									styles.resultBadge,
-									item.correctGuess
+									isGuessCorrect(item)
 										? styles.correctBadge
 										: styles.incorrectBadge,
 								]}
 							>
 								<Text style={styles.resultText}>
-									{item.correctGuess ? 'Correct' : 'Incorrect'}
+									{isGuessCorrect(item) ? 'Correct' : 'Incorrect'}
 								</Text>
 							</View>
 						</TouchableOpacity>
