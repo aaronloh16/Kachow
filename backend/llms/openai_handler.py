@@ -2,13 +2,13 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import os
 from pathlib import Path
-
-load_dotenv()
-
 import os
 import base64
 from flask import jsonify
 from openai import OpenAI
+
+
+load_dotenv()
 
 def encode_image(image_path):
     """Convert an image file to a base64-encoded string."""
