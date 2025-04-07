@@ -198,6 +198,7 @@ export default function HistoryScreen() {
 
 		fetchHistory();
 		console.log(history)
+		
 	}, [session?.uid]);
 
 	const handleItemPress = (item: any) => {
@@ -212,6 +213,17 @@ export default function HistoryScreen() {
 			day: 'numeric',
 		});
 	};
+	const isGuessCorrect = (item: any) => {
+		if (!item.results || !item.userGuess || !item.userGuess.make || !item.userGuess.model)
+			return false;
+
+		const makeCorrect =
+			item.userGuess.make.toLowerCase() === item.results.aggregated.make.toLowerCase();
+		const modelCorrect =
+			item.userGuess.model.toLowerCase() === item.results.aggregated.model.toLowerCase();
+
+		return makeCorrect && modelCorrect;
+	}
 
 	return (
 		<View style={styles.container}>
@@ -248,14 +260,16 @@ export default function HistoryScreen() {
 							<View
 								style={[
 									styles.resultBadge,
-									item.correctGuess
+									isGuessCorrect(item)
 										? styles.correctBadge
 										: styles.incorrectBadge,
 								]}
 							>
 								<Text style={styles.resultText}>
-									{item.correctGuess ? 'Correct' : 'Incorrect'}
+									
+									{isGuessCorrect(item) ? 'Correct' : 'Incorrect'}
 								</Text>
+								
 							</View>
 						</TouchableOpacity>
 					)}

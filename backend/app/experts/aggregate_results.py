@@ -42,6 +42,7 @@ Return a JSON object with these keys:
 - year: the estimated year or generation
 - confidence: your overall confidence (high, medium, low)
 - details: a brief explanation of your reasoning, mentioning which experts agreed
+- insights: this is an innovative feature, give cool details and insights into the car such as mods to be made etc.."
 
 Respond ONLY with valid JSON. No markdown, no text outside of JSON.
 """

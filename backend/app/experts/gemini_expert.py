@@ -57,6 +57,7 @@ class GeminiHandler:
                 "year": "Year or generation",
                 "confidence": "high/medium/low",
                 "details": "Brief explanation of your identification"
+                "insights: this is an innovative feature, give cool details and insights into the car such as mods to be made etc..""
             }
             """
 
@@ -131,6 +132,7 @@ class GeminiHandler:
             - year: estimated year or generation
             - confidence: high, medium, or low
             - details: a short sentence explaining your reasoning, and mention if/why you disagree with others
+            - insights: give cool facts and insights about the car, things like car mods etc (this is our innovative feature)
 
             Respond ONLY in this JSON format with no additional text.
             """
