@@ -1,6 +1,6 @@
 // app/loading.tsx
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-//import LottieView from 'lottie-react-native';
+import LottieView from 'lottie-react-native';
 
 import { useEffect, useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -20,12 +20,12 @@ export default function LoadingScreen() {
 
 	return (
 		<View style={styles.container}>
-			{/* <LottieView
+			<LottieView
             source={require('../assets/car-revving.json')}
             autoPlay
             loop
             style={{ width: 300, height: 300 }}
-            /> */}
+            />
             <Text style={styles.text}>Identifying car...</Text>
 
 			<TouchableOpacity style={styles.cancelButton} >
