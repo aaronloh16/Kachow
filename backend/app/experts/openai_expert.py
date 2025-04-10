@@ -41,6 +41,7 @@ class OpenAIHandler:
                                 "- year: estimated year or generation\n"
                                 "- confidence: high, medium, or low\n"
                                 "- details: a short sentence explaining your reasoning\n\n"
+                                "- insights: give cool facts and insights about the car, things like car mods etc (this is our innovative feature)"
                                 "Respond ONLY in this JSON format. No explanation outside of it."
                             )
                         },
@@ -84,6 +85,7 @@ class OpenAIHandler:
                                 "- year: estimated year or generation\n"
                                 "- confidence: high, medium, or low\n"
                                 "- details: a short sentence explaining your reasoning, and mention if/why you disagree with others\n\n"
+                                "- insights: give cool facts and insights about the car, things like possible car mods etc (this is our innovative feature)"
                                 "Respond ONLY in this JSON format. No explanation outside of it."
                             )
                         },

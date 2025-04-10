@@ -47,7 +47,8 @@ Return a JSON object with these keys:
 - model: the final determination of the car model
 - year: the estimated year or generation
 - confidence: your overall confidence (high, medium, low)
-- details: a brief explanation of your reasoning, followed by interesting facts about the identified car
+- details: a brief explanation of your reasoning, mentioning which experts agreed
+- insights: this is an innovative feature, give cool details and insights into the car such as mods to be made etc.."
 
 Respond ONLY with valid JSON. No markdown, no text outside of JSON.
 """

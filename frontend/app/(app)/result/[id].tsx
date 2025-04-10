@@ -22,6 +22,7 @@ type ResultData = {
 	year: string;
 	confidence: string;
 	details: string;
+	insights: string;
 	error?: string;
 };
 
@@ -319,10 +320,8 @@ export default function ResultScreen() {
 								</Text>
 							</View>
 							<View style={styles.detailsContainer}>
-								<Text style={styles.detailsLabel}>
-									Details and interesting facts:
-								</Text>
-								<Text style={styles.detailsText}>{mainResult.details}</Text>
+								<Text style={styles.detailsLabel}>Insights:</Text>
+								<Text style={styles.detailsText}>{mainResult.insights}</Text>
 							</View>
 						</View>
 					)}

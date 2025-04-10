@@ -1,5 +1,4 @@
 absl-py==2.2.2
-altgraph==0.17.4
 annotated-types==0.7.0
 anyio==4.9.0
 astunparse==1.6.3
@@ -44,7 +43,6 @@ Jinja2==3.1.6
 jiter==0.9.0
 keras==3.9.2
 libclang==18.1.1
-macholib==1.16.3
 Markdown==3.7
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
@@ -66,8 +64,6 @@ pycparser==2.22
 pydantic==2.11.2
 pydantic_core==2.33.1
 Pygments==2.19.1
-pyinstaller==6.12.0
-pyinstaller-hooks-contrib==2025.2
 PyJWT==2.10.1
 pyparsing==3.2.3
 python-dotenv==1.1.0

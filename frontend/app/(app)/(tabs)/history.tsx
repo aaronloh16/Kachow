@@ -215,7 +215,6 @@ export default function HistoryScreen() {
 		};
 
 		fetchHistory();
-		console.log(history);
 	}, [session?.uid]);
 
 	const handleItemPress = (item: any) => {
@@ -230,6 +229,17 @@ export default function HistoryScreen() {
 			day: 'numeric',
 		});
 	};
+	const isGuessCorrect = (item: any) => {
+		if (!item.results || !item.userGuess || !item.userGuess.make || !item.userGuess.model)
+			return false;
+
+		const makeCorrect =
+			item.userGuess.make.toLowerCase() === item.results.aggregated.make.toLowerCase();
+		const modelCorrect =
+			item.userGuess.model.toLowerCase() === item.results.aggregated.model.toLowerCase();
+
+		return makeCorrect && modelCorrect;
+	}
 
 	// Determine if a guess is correct based on real-time calculation or stored value
 	const isGuessCorrect = (item: any) => {
@@ -286,6 +296,7 @@ export default function HistoryScreen() {
 								<Text style={styles.resultText}>
 									{isGuessCorrect(item) ? 'Correct' : 'Incorrect'}
 								</Text>
+								
 							</View>
 						</TouchableOpacity>
 					)}
